@@ -60,22 +60,21 @@ function checkGoogleAuthRedirect() {
   // After Google login, the user will be redirected to the dashboard
   // We need to fetch the current user info to update localStorage
   if (window.location.pathname === '/dashboard.html' && !localStorage.getItem('user')) {
-    // Fetch current user info
-    fetch('/api/users/me')
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw new Error('Not authenticated');
-      })
-      .then(data => {
-        // Store user in localStorage
-        localStorage.setItem('user', JSON.stringify(data.user));
-      })
-      .catch(error => {
-        console.error('Error fetching user after Google login:', error);
-        // Redirect to login if not authenticated
-        window.location.href = '/login.html';
-      });
+    console.log('Detected potential Google auth redirect to dashboard');
+    // This will be handled by the dashboard.html page itself
+    return;
+  }
+
+  // Check for error parameter in URL (from Google auth failure)
+  const urlParams = new URLSearchParams(window.location.search);
+  const error = urlParams.get('error');
+  if (error) {
+    console.error('Google authentication error:', error);
+    // Display error message to user
+    const errorElement = document.getElementById('error-message');
+    if (errorElement) {
+      errorElement.textContent = `Google authentication failed: ${error}`;
+      errorElement.style.display = 'block';
+    }
   }
 }

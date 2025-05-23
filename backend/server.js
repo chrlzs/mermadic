@@ -16,6 +16,9 @@ require('./config/passport');
 // Initialize database
 const db = require('./db');
 
+// Import database debugging utility
+const { checkDatabaseSchema } = require('./utils/db-debug');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -51,6 +54,16 @@ app.get('/', (req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+
+  // Check database schema on startup
+  checkDatabaseSchema();
+
+  // Log environment variables (without sensitive values)
+  console.log('Environment variables:');
+  console.log('PORT:', process.env.PORT);
+  console.log('GOOGLE_CALLBACK_URL:', process.env.GOOGLE_CALLBACK_URL);
+  console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not set');
+  console.log('GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not set');
 });
 
 // Handle unhandled promise rejections
