@@ -456,6 +456,7 @@ svg {
   max-width: 100% !important;
   height: auto !important;
   display: block !important;
+  overflow: visible !important;
 }
 
 /* Fix for absolute positioning in Mermaid diagrams */
@@ -469,6 +470,37 @@ svg {
 .mermaid line,
 .mermaid text {
   position: relative !important;
+}
+
+/* More aggressive fix for Mermaid diagrams */
+body svg,
+.chart-preview-small svg,
+.view-chart-container svg,
+#chart-preview svg {
+  position: static !important;
+  z-index: 10 !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  overflow: visible !important;
+}
+
+/* Target specific chart previews */
+[id^="chart-preview-"] {
+  position: relative !important;
+  z-index: 5 !important;
+  overflow: hidden !important;
+  max-height: 150px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Ensure footer stays below content */
+footer {
+  position: relative;
+  z-index: 1;
+  margin-top: 2rem;
+  clear: both;
 }
 
 /* Responsive */

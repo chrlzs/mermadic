@@ -9,6 +9,7 @@ const passport = require('passport');
 const userRoutes = require('./routes/users');
 const chartRoutes = require('./routes/charts');
 const authRoutes = require('./routes/auth');
+const renderRoutes = require('./routes/render');
 
 // Import passport configuration
 require('./config/passport');
@@ -45,6 +46,7 @@ app.use(passport.session());
 app.use('/api/users', userRoutes);
 app.use('/api/charts', chartRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/render', renderRoutes);
 
 // Serve frontend
 app.get('/', (req, res) => {
