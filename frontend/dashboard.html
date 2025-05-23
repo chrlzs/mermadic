@@ -319,21 +319,22 @@
             previewContainer.id = containerId;
             chartCard.appendChild(previewContainer);
 
-            // Render the diagram using the render API
-            try {
-              mermaid.render(containerId, chart.content)
-                .then(result => {
-                  // Success - insert the rendered SVG
-                  previewContainer.innerHTML = result.svg;
-                })
-                .catch(error => {
-                  console.error('Error rendering chart preview:', error);
-                  previewContainer.innerHTML = '<div class="error-message">Error rendering diagram</div>';
-                });
-            } catch (error) {
-              console.error('Error parsing chart preview:', error);
-              previewContainer.innerHTML = '<div class="error-message">Invalid diagram syntax</div>';
-            }
+            // Create a div with the mermaid class
+            const mermaidDiv = document.createElement('div');
+            mermaidDiv.className = 'mermaid';
+            mermaidDiv.textContent = chart.content;
+            previewContainer.appendChild(mermaidDiv);
+
+            // Use setTimeout to ensure the DOM is fully updated before rendering
+            setTimeout(() => {
+              try {
+                // Initialize Mermaid on the new element
+                mermaid.init(undefined, mermaidDiv);
+              } catch (error) {
+                console.error('Error rendering chart preview:', error);
+                previewContainer.innerHTML = '<div class="error-message">Error rendering diagram</div>';
+              }
+            }, 100);
 
             // Create the actions container
             const actionsContainer = document.createElement('div');
@@ -509,58 +510,37 @@
         document.getElementById('view-delete-chart').setAttribute('data-id', chartData.id);
         document.getElementById('view-share-chart').setAttribute('data-id', chartData.share_id);
 
+        // Show the modal first to ensure the container is visible
+        document.getElementById('view-chart-modal').style.display = 'block';
+
         // Get the container
         const container = document.getElementById('view-chart-container');
         container.innerHTML = '';
 
-        // Generate a unique ID for the diagram
-        const id = 'view-mermaid-diagram-' + Date.now();
+        // Create a div with the mermaid class
+        const mermaidDiv = document.createElement('div');
+        mermaidDiv.className = 'mermaid';
+        mermaidDiv.textContent = chartData.content;
+        container.appendChild(mermaidDiv);
 
-        // Create a container for the rendered diagram
-        const viewContainer = document.createElement('div');
-        viewContainer.id = id;
-        container.appendChild(viewContainer);
-
-        // Render the diagram using the render API
-        try {
-          mermaid.render(id, chartData.content)
-            .then(result => {
-              // Success - insert the rendered SVG
-              viewContainer.innerHTML = result.svg;
-
-              // Show the modal
-              document.getElementById('view-chart-modal').style.display = 'block';
-            })
-            .catch(error => {
-              console.error('Error rendering diagram:', error);
-              viewContainer.innerHTML = `<div class="error-message">
-                <strong>Error rendering diagram:</strong><br>
-                ${error.message || 'Unknown error'}<br><br>
-                <strong>Common issues to check:</strong><br>
-                - Indentation and whitespace<br>
-                - Special characters (try using simple ASCII characters)<br>
-                - Missing connections or closing brackets<br>
-                - Subgraph syntax (ensure proper nesting)<br>
-              </div>`;
-
-              // Show the modal even if there's an error
-              document.getElementById('view-chart-modal').style.display = 'block';
-            });
-        } catch (error) {
-          console.error('Error parsing diagram:', error);
-          viewContainer.innerHTML = `<div class="error-message">
-            <strong>Mermaid Syntax Error:</strong><br>
-            ${error.message || error}<br><br>
-            <strong>Common issues to check:</strong><br>
-            - Indentation and whitespace<br>
-            - Special characters (try using simple ASCII characters)<br>
-            - Missing connections or closing brackets<br>
-            - Subgraph syntax (ensure proper nesting)<br>
-          </div>`;
-
-          // Show the modal even if there's an error
-          document.getElementById('view-chart-modal').style.display = 'block';
-        }
+        // Use setTimeout to ensure the DOM is fully updated before rendering
+        setTimeout(() => {
+          try {
+            // Initialize Mermaid on the new element
+            mermaid.init(undefined, mermaidDiv);
+          } catch (error) {
+            console.error('Error rendering diagram in modal:', error);
+            container.innerHTML = `<div class="error-message">
+              <strong>Error rendering diagram:</strong><br>
+              ${error.message || 'Unknown error'}<br><br>
+              <strong>Common issues to check:</strong><br>
+              - Indentation and whitespace<br>
+              - Special characters (try using simple ASCII characters)<br>
+              - Missing connections or closing brackets<br>
+              - Subgraph syntax (ensure proper nesting)<br>
+            </div>`;
+          }
+        }, 100);
       } catch (error) {
         console.error('Error viewing chart:', error);
         alert('Error viewing chart: ' + error.message);
