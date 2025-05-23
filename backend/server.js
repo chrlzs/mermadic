@@ -3,10 +3,15 @@ const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
 const path = require('path');
+const passport = require('passport');
 
 // Import routes
 const userRoutes = require('./routes/users');
 const chartRoutes = require('./routes/charts');
+const authRoutes = require('./routes/auth');
+
+// Import passport configuration
+require('./config/passport');
 
 // Initialize database
 const db = require('./db');
@@ -29,9 +34,14 @@ app.use(session({
   cookie: { secure: false } // Set to true if using HTTPS
 }));
 
+// Initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/charts', chartRoutes);
+app.use('/api/auth', authRoutes);
 
 // Serve frontend
 app.get('/', (req, res) => {
