@@ -178,11 +178,22 @@ exports.renderDiagramHtml = async (req, res) => {
 <body>
   <div class="container">
     ${title ? `<h1>${title}</h1>` : ''}
-    <div class="mermaid">
+    <div id="mermaid-container" class="mermaid-container">
+      <div id="mermaid-content" class="mermaid">
 ${content}
+      </div>
     </div>
+    <script>
+      // Initialize zoom controls when the page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+          initZoomControls('mermaid-container', 'mermaid-content');
+        }, 500);
+      });
+    </script>
   </div>
   <script src="/js/mermaid.min.js"></script>
+  <script src="/js/zoom-controls.js"></script>
   <script>
     mermaid.initialize({
       startOnLoad: true,
@@ -272,14 +283,25 @@ exports.renderDiagramPage = async (req, res) => {
 <body>
   <div class="container">
     <h1>${chart.title}</h1>
-    <div class="mermaid">
+    <div id="mermaid-container" class="mermaid-container">
+      <div id="mermaid-content" class="mermaid">
 ${chart.content}
+      </div>
     </div>
+    <script>
+      // Initialize zoom controls when the page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+          initZoomControls('mermaid-container', 'mermaid-content');
+        }, 500);
+      });
+    </script>
     <div class="footer">
       <p>Created with <a href="/">Mermadic</a></p>
     </div>
   </div>
   <script src="/js/mermaid.min.js"></script>
+  <script src="/js/zoom-controls.js"></script>
   <script>
     mermaid.initialize({
       startOnLoad: true,
