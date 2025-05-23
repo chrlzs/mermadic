@@ -87,8 +87,14 @@
   <script src="/js/auth.js"></script>
   <script src="/js/charts.js"></script>
   <script>
-    // Initialize Mermaid
-    mermaid.initialize({ startOnLoad: false });
+    // Initialize Mermaid with better error handling
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default',
+      logLevel: 'error',
+      fontFamily: 'monospace'
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
       // Check if user is logged in via localStorage
@@ -149,9 +155,46 @@
       const content = document.getElementById('chart-content').value;
       const preview = document.getElementById('chart-preview');
 
-      preview.innerHTML = '';
-      preview.innerHTML = content;
-      mermaid.init(undefined, preview);
+      try {
+        // Clear the preview div
+        preview.innerHTML = '';
+
+        // Create a div element with class mermaid
+        const mermaidDiv = document.createElement('div');
+        mermaidDiv.className = 'mermaid';
+        mermaidDiv.textContent = content;
+
+        // Append the div element to the preview div
+        preview.appendChild(mermaidDiv);
+
+        // Add error handling callback
+        mermaid.parseError = function(err, hash) {
+          console.error('Mermaid parse error:', err);
+          preview.innerHTML = `<div class="error-message">
+            <strong>Mermaid Syntax Error:</strong><br>
+            ${err}<br><br>
+            <strong>Common issues to check:</strong><br>
+            - Indentation and whitespace<br>
+            - Special characters (try using simple ASCII characters)<br>
+            - Missing connections or closing brackets<br>
+            - Subgraph syntax (ensure proper nesting)<br>
+          </div>`;
+        };
+
+        // Render the diagram
+        mermaid.init(undefined, mermaidDiv);
+      } catch (error) {
+        console.error('Error rendering Mermaid diagram:', error);
+        preview.innerHTML = `<div class="error-message">
+          <strong>Error rendering diagram:</strong><br>
+          ${error.message}<br><br>
+          <strong>Common issues to check:</strong><br>
+          - Indentation and whitespace<br>
+          - Special characters (try using simple ASCII characters)<br>
+          - Missing connections or closing brackets<br>
+          - Subgraph syntax (ensure proper nesting)<br>
+        </div>`;
+      }
     }
 
     async function loadUserCharts() {
@@ -179,17 +222,32 @@
           data.charts.forEach(chart => {
             const chartCard = document.createElement('div');
             chartCard.className = 'chart-card';
-            chartCard.innerHTML = `
-              <h4>${chart.title}</h4>
-              <div class="chart-preview-small mermaid">
-                ${chart.content}
-              </div>
-              <div class="chart-actions">
-                <button class="nui-button small edit-chart" data-id="${chart.id}">Edit</button>
-                <button class="nui-button small delete-chart" data-id="${chart.id}">Delete</button>
-                <button class="nui-button small share-chart" data-id="${chart.share_id}">Share</button>
-              </div>
+
+            // Create the card header with title
+            const cardHeader = document.createElement('h4');
+            cardHeader.textContent = chart.title;
+            chartCard.appendChild(cardHeader);
+
+            // Create the chart preview container
+            const previewContainer = document.createElement('div');
+            previewContainer.className = 'chart-preview-small';
+
+            // Create the mermaid div
+            const mermaidDiv = document.createElement('div');
+            mermaidDiv.className = 'mermaid';
+            mermaidDiv.textContent = chart.content;
+            previewContainer.appendChild(mermaidDiv);
+            chartCard.appendChild(previewContainer);
+
+            // Create the actions container
+            const actionsContainer = document.createElement('div');
+            actionsContainer.className = 'chart-actions';
+            actionsContainer.innerHTML = `
+              <button class="nui-button small edit-chart" data-id="${chart.id}">Edit</button>
+              <button class="nui-button small delete-chart" data-id="${chart.id}">Delete</button>
+              <button class="nui-button small share-chart" data-id="${chart.share_id}">Share</button>
             `;
+            chartCard.appendChild(actionsContainer);
 
             chartsGrid.appendChild(chartCard);
           });

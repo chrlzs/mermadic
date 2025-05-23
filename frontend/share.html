@@ -26,12 +26,12 @@
   <main class="container">
     <section id="shared-chart" class="shared-chart">
       <div id="loading-message">Loading diagram...</div>
-      
+
       <div id="chart-container" style="display: none;">
         <h2 id="chart-title"></h2>
         <div id="chart-content" class="mermaid-preview"></div>
       </div>
-      
+
       <div id="error-message" class="error-message" style="display: none;"></div>
     </section>
   </main>
@@ -46,25 +46,31 @@
   <script src="/nui/nui.js"></script>
   <script src="/js/auth.js"></script>
   <script>
-    // Initialize Mermaid
-    mermaid.initialize({ startOnLoad: false });
-    
+    // Initialize Mermaid with better error handling
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default',
+      logLevel: 'error',
+      fontFamily: 'monospace'
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
       // Check authentication status
       checkAuthStatus();
-      
+
       // Get share ID from URL
       const urlParams = new URLSearchParams(window.location.search);
       const shareId = urlParams.get('id');
-      
+
       if (!shareId) {
         showError('No diagram ID provided');
         return;
       }
-      
+
       loadSharedChart(shareId);
     });
-    
+
     async function loadSharedChart(shareId) {
       try {
         const response = await fetch(`/api/charts/share/${shareId}`, {
@@ -73,32 +79,74 @@
             'Content-Type': 'application/json'
           }
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to load diagram');
         }
-        
+
         const data = await response.json();
         const chart = data.chart;
-        
+
         document.getElementById('chart-title').textContent = chart.title;
-        document.getElementById('chart-content').innerHTML = chart.content;
-        
-        // Hide loading message and show chart
-        document.getElementById('loading-message').style.display = 'none';
-        document.getElementById('chart-container').style.display = 'block';
-        
-        // Render the Mermaid diagram
-        mermaid.init(undefined, document.getElementById('chart-content'));
+
+        // Create a mermaid div for the content
+        const chartContent = document.getElementById('chart-content');
+        chartContent.innerHTML = '';
+
+        try {
+          // Create a div element with class mermaid
+          const mermaidDiv = document.createElement('div');
+          mermaidDiv.className = 'mermaid';
+          mermaidDiv.textContent = chart.content;
+
+          // Append the div element to the content div
+          chartContent.appendChild(mermaidDiv);
+
+          // Hide loading message and show chart
+          document.getElementById('loading-message').style.display = 'none';
+          document.getElementById('chart-container').style.display = 'block';
+
+          // Add error handling callback
+          mermaid.parseError = function(err, hash) {
+            console.error('Mermaid parse error:', err);
+            chartContent.innerHTML = `<div class="error-message">
+              <strong>Mermaid Syntax Error:</strong><br>
+              ${err}<br><br>
+              <strong>Common issues to check:</strong><br>
+              - Indentation and whitespace<br>
+              - Special characters (try using simple ASCII characters)<br>
+              - Missing connections or closing brackets<br>
+              - Subgraph syntax (ensure proper nesting)<br>
+            </div>`;
+            document.getElementById('loading-message').style.display = 'none';
+            document.getElementById('chart-container').style.display = 'block';
+          };
+
+          // Render the Mermaid diagram
+          mermaid.init(undefined, mermaidDiv);
+        } catch (error) {
+          console.error('Error rendering Mermaid diagram:', error);
+          chartContent.innerHTML = `<div class="error-message">
+            <strong>Error rendering diagram:</strong><br>
+            ${error.message}<br><br>
+            <strong>Common issues to check:</strong><br>
+            - Indentation and whitespace<br>
+            - Special characters (try using simple ASCII characters)<br>
+            - Missing connections or closing brackets<br>
+            - Subgraph syntax (ensure proper nesting)<br>
+          </div>`;
+          document.getElementById('loading-message').style.display = 'none';
+          document.getElementById('chart-container').style.display = 'block';
+        }
       } catch (error) {
         showError(error.message || 'Failed to load diagram');
       }
     }
-    
+
     function showError(message) {
       document.getElementById('loading-message').style.display = 'none';
       document.getElementById('chart-container').style.display = 'none';
-      
+
       const errorMessage = document.getElementById('error-message');
       errorMessage.textContent = message;
       errorMessage.style.display = 'block';

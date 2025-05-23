@@ -85,21 +85,71 @@
   <script src="/js/main.js"></script>
   <script src="/js/auth.js"></script>
   <script>
-    // Initialize Mermaid
-    mermaid.initialize({ startOnLoad: false });
-    
+    // Initialize Mermaid with better error handling
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default',
+      logLevel: 'error',
+      fontFamily: 'monospace'
+    });
+
     // Demo editor functionality
     document.addEventListener('DOMContentLoaded', function() {
       const demoEditor = document.getElementById('demo-editor');
       const demoPreview = document.getElementById('demo-preview');
-      
+
       function updatePreview() {
-        demoPreview.innerHTML = '';
-        demoPreview.innerHTML = demoEditor.value;
-        mermaid.init(undefined, demoPreview);
+        try {
+          // Clear the preview div
+          demoPreview.innerHTML = '';
+
+          // Create a div element with class mermaid
+          const mermaidDiv = document.createElement('div');
+          mermaidDiv.className = 'mermaid';
+          mermaidDiv.textContent = demoEditor.value;
+
+          // Append the div element to the preview div
+          demoPreview.appendChild(mermaidDiv);
+
+          // Add error handling callback
+          mermaid.parseError = function(err, hash) {
+            console.error('Mermaid parse error:', err);
+            demoPreview.innerHTML = `<div class="error-message">
+              <strong>Mermaid Syntax Error:</strong><br>
+              ${err}<br><br>
+              <strong>Common issues to check:</strong><br>
+              - Indentation and whitespace<br>
+              - Special characters (try using simple ASCII characters)<br>
+              - Missing connections or closing brackets<br>
+              - Subgraph syntax (ensure proper nesting)<br>
+            </div>`;
+          };
+
+          // Render the diagram
+          mermaid.init(undefined, mermaidDiv);
+        } catch (error) {
+          console.error('Error rendering Mermaid diagram:', error);
+          demoPreview.innerHTML = `<div class="error-message">
+            <strong>Error rendering diagram:</strong><br>
+            ${error.message}<br><br>
+            <strong>Common issues to check:</strong><br>
+            - Indentation and whitespace<br>
+            - Special characters (try using simple ASCII characters)<br>
+            - Missing connections or closing brackets<br>
+            - Subgraph syntax (ensure proper nesting)<br>
+          </div>`;
+        }
       }
-      
-      demoEditor.addEventListener('input', updatePreview);
+
+      // Update preview on input with debounce
+      let debounceTimer;
+      demoEditor.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(updatePreview, 300); // 300ms debounce
+      });
+
+      // Initial preview
       updatePreview();
     });
   </script>
