@@ -90,7 +90,7 @@
       startOnLoad: false,
       securityLevel: 'loose',
       theme: 'default',
-      logLevel: 'warn', // Change from 'error' to 'warn' to reduce console noise
+      logLevel: 'error', // Change to 'error' to hide warnings
       fontFamily: 'monospace',
       flowchart: {
         useMaxWidth: true,
@@ -125,10 +125,13 @@
           // Clear the preview div
           demoPreview.innerHTML = '';
 
-          // Create a div element with class mermaid
+          // Generate a unique ID for the diagram
+          const id = 'mermaid-diagram-' + Date.now();
+
+          // Create a div element with the unique ID
           const mermaidDiv = document.createElement('div');
+          mermaidDiv.id = id;
           mermaidDiv.className = 'mermaid';
-          mermaidDiv.textContent = demoEditor.value;
 
           // Append the div element to the preview div
           demoPreview.appendChild(mermaidDiv);
@@ -147,12 +150,31 @@
             </div>`;
           };
 
-          // Render the diagram
-          mermaid.init(undefined, mermaidDiv);
+          // Render the diagram using the new run API
+          mermaid.run({
+            nodes: [document.getElementById(id)],
+            suppressErrors: true
+          }).then(() => {
+            // Success - diagram rendered
+          }).catch(error => {
+            console.error('Error rendering Mermaid diagram:', error);
+            demoPreview.innerHTML = `<div class="error-message">
+              <strong>Error rendering diagram:</strong><br>
+              ${error.message || 'Unknown error'}<br><br>
+              <strong>Common issues to check:</strong><br>
+              - Indentation and whitespace<br>
+              - Special characters (try using simple ASCII characters)<br>
+              - Missing connections or closing brackets<br>
+              - Subgraph syntax (ensure proper nesting)<br>
+            </div>`;
+          });
+
+          // Set the diagram code after creating the element
+          mermaidDiv.textContent = demoEditor.value;
         } catch (error) {
-          console.error('Error rendering Mermaid diagram:', error);
+          console.error('Error setting up Mermaid diagram:', error);
           demoPreview.innerHTML = `<div class="error-message">
-            <strong>Error rendering diagram:</strong><br>
+            <strong>Error setting up diagram:</strong><br>
             ${error.message}<br><br>
             <strong>Common issues to check:</strong><br>
             - Indentation and whitespace<br>
