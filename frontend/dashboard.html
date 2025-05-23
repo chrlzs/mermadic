@@ -421,16 +421,23 @@
 
     async function editChart(chartId) {
       try {
+        console.log('Editing chart with ID:', chartId);
         const chart = await getChartById(chartId);
+        console.log('Chart data received:', chart);
+
         if (!chart) {
           alert('Chart not found');
           return;
         }
 
-        document.getElementById('chart-id').value = chart.id;
-        document.getElementById('chart-title').value = chart.title;
-        document.getElementById('chart-content').value = chart.content;
-        document.getElementById('chart-public').checked = chart.public === 1;
+        // Make sure we're getting the correct data structure
+        const chartData = chart.chart || chart;
+        console.log('Chart data to use:', chartData);
+
+        document.getElementById('chart-id').value = chartData.id;
+        document.getElementById('chart-title').value = chartData.title;
+        document.getElementById('chart-content').value = chartData.content;
+        document.getElementById('chart-public').checked = chartData.public === 1;
         document.getElementById('editor-title').textContent = 'Edit Diagram';
 
         showChartEditor();
@@ -480,20 +487,27 @@
     // View chart in modal
     async function viewChart(chartId) {
       try {
+        console.log('Viewing chart with ID:', chartId);
         // Get the chart data
         const chart = await getChartById(chartId);
+        console.log('Chart data received for view:', chart);
+
         if (!chart) {
           alert('Chart not found');
           return;
         }
 
+        // Make sure we're getting the correct data structure
+        const chartData = chart.chart || chart;
+        console.log('Chart data to use for view:', chartData);
+
         // Set the chart title
-        document.getElementById('view-chart-title').textContent = chart.title;
+        document.getElementById('view-chart-title').textContent = chartData.title;
 
         // Set data attributes for the action buttons
-        document.getElementById('view-edit-chart').setAttribute('data-id', chart.id);
-        document.getElementById('view-delete-chart').setAttribute('data-id', chart.id);
-        document.getElementById('view-share-chart').setAttribute('data-id', chart.share_id);
+        document.getElementById('view-edit-chart').setAttribute('data-id', chartData.id);
+        document.getElementById('view-delete-chart').setAttribute('data-id', chartData.id);
+        document.getElementById('view-share-chart').setAttribute('data-id', chartData.share_id);
 
         // Get the container
         const container = document.getElementById('view-chart-container');
@@ -509,7 +523,7 @@
 
         // Render the diagram using the render API
         try {
-          mermaid.render(id, chart.content)
+          mermaid.render(id, chartData.content)
             .then(result => {
               // Success - insert the rendered SVG
               viewContainer.innerHTML = result.svg;
