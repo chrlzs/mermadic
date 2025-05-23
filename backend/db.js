@@ -8,7 +8,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
     return;
   }
   console.log('Connected to SQLite database');
-  
+
   // Create tables if they don't exist
   db.serialize(() => {
     // Users table
@@ -16,10 +16,13 @@ const db = new sqlite3.Database(dbPath, (err) => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE NOT NULL,
       email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
+      password TEXT,
+      google_id TEXT UNIQUE,
+      profile_picture TEXT,
+      auth_type TEXT DEFAULT 'local',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
-    
+
     // Charts table
     db.run(`CREATE TABLE IF NOT EXISTS charts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
