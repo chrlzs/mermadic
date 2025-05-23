@@ -68,38 +68,52 @@ async function logout(e) {
 
 // Verify if the session is still valid
 async function verifySession() {
-  // Only check once every 5 minutes to avoid excessive API calls
-  const lastCheck = localStorage.getItem('session_last_check');
-  const now = Date.now();
-  if (lastCheck && now - parseInt(lastCheck) < 5 * 60 * 1000) {
-    return; // Skip check if we checked recently
-  }
-
-  try {
-    const response = await fetch('/api/users/me', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        // Session expired
-        console.warn('Session verification failed - clearing user data');
-        localStorage.removeItem('user');
-        window.location.href = '/login.html?session=expired';
-        return;
-      }
+  return new Promise(async (resolve, reject) => {
+    // Only check once every minute to avoid excessive API calls
+    // but still catch session expiration quickly
+    const lastCheck = localStorage.getItem('session_last_check');
+    const now = Date.now();
+    if (lastCheck && now - parseInt(lastCheck) < 60 * 1000) {
+      return resolve(); // Skip check if we checked recently
     }
 
-    // Update last check timestamp
-    localStorage.setItem('session_last_check', now.toString());
-  } catch (error) {
-    console.error('Error verifying session:', error);
-    // Don't log out on network errors
-  }
+    try {
+      const response = await fetch('/api/users/me', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Session expired
+          console.warn('Session verification failed - clearing user data');
+          localStorage.removeItem('user');
+          localStorage.removeItem('session_last_check');
+          window.location.href = '/login.html?session=expired';
+          return reject(new Error('Session expired'));
+        }
+        return reject(new Error('Failed to verify session'));
+      } else {
+        // Session is valid, update user data
+        const data = await response.json();
+        if (data.user) {
+          // Update the user data in localStorage
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
+      }
+
+      // Update last check timestamp
+      localStorage.setItem('session_last_check', now.toString());
+      resolve();
+    } catch (error) {
+      console.error('Error verifying session:', error);
+      // Don't log out on network errors, but reject the promise
+      reject(error);
+    }
+  });
 }
 
 // Check for Google auth redirect

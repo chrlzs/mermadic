@@ -92,12 +92,12 @@
       startOnLoad: false,
       securityLevel: 'loose',
       theme: 'default',
-      logLevel: 'error', // Change to 'error' to hide warnings
+      logLevel: 'fatal', // Only show fatal errors
       fontFamily: 'monospace',
       flowchart: {
         useMaxWidth: true,
         htmlLabels: true,
-        curve: 'basis'
+        curve: 'linear' // Use linear curves which are more reliable
       },
       er: {
         useMaxWidth: true
@@ -144,8 +144,17 @@
             window.location.href = '/login.html';
           });
       } else {
-        // User already in localStorage, load charts
-        loadUserCharts();
+        // User already in localStorage, but verify session is still valid
+        verifySession()
+          .then(() => {
+            // Session is valid, load charts
+            loadUserCharts();
+          })
+          .catch(error => {
+            console.error('Error verifying session:', error);
+            // Try to load charts anyway
+            loadUserCharts();
+          });
       }
 
       // Setup event listeners
@@ -183,56 +192,51 @@
         // Generate a unique ID for the diagram
         const id = 'mermaid-diagram-' + Date.now();
 
-        // Create a div element with class mermaid and unique ID
-        const mermaidDiv = document.createElement('div');
-        mermaidDiv.className = 'mermaid';
-        mermaidDiv.id = id;
+        // Create a container for the rendered diagram
+        const container = document.createElement('div');
+        container.id = id;
+        preview.appendChild(container);
 
-        // Set the diagram code BEFORE appending to DOM
-        mermaidDiv.textContent = content;
+        // Use the render API which is more stable
+        try {
+          // First try to parse the diagram to catch syntax errors
+          mermaid.parse(content);
 
-        // Append the div element to the preview div
-        preview.appendChild(mermaidDiv);
-
-        // Add error handling callback
-        mermaid.parseError = function(err, hash) {
-          console.error('Mermaid parse error:', err);
+          // If parsing succeeds, render the diagram
+          mermaid.render(id, content)
+            .then(result => {
+              // Success - insert the rendered SVG
+              container.innerHTML = result.svg;
+            })
+            .catch(error => {
+              console.error('Error rendering Mermaid diagram:', error);
+              preview.innerHTML = `<div class="error-message">
+                <strong>Error rendering diagram:</strong><br>
+                ${error.message || 'Unknown error'}<br><br>
+                <strong>Common issues to check:</strong><br>
+                - Indentation and whitespace<br>
+                - Special characters (try using simple ASCII characters)<br>
+                - Missing connections or closing brackets<br>
+                - Subgraph syntax (ensure proper nesting)<br>
+              </div>`;
+            });
+        } catch (parseError) {
+          // Handle syntax errors
+          console.error('Mermaid parse error:', parseError);
           preview.innerHTML = `<div class="error-message">
             <strong>Mermaid Syntax Error:</strong><br>
-            ${err}<br><br>
+            ${parseError.message || parseError}<br><br>
             <strong>Common issues to check:</strong><br>
             - Indentation and whitespace<br>
             - Special characters (try using simple ASCII characters)<br>
             - Missing connections or closing brackets<br>
             - Subgraph syntax (ensure proper nesting)<br>
           </div>`;
-        };
-
-        // Use setTimeout to ensure the DOM is fully updated before rendering
-        setTimeout(() => {
-          // Render the diagram using the new run API
-          mermaid.run({
-            nodes: [document.getElementById(id)],
-            suppressErrors: true
-          }).then(() => {
-            // Success - diagram rendered
-          }).catch(error => {
-            console.error('Error rendering Mermaid diagram:', error);
-            preview.innerHTML = `<div class="error-message">
-              <strong>Error rendering diagram:</strong><br>
-              ${error.message || 'Unknown error'}<br><br>
-              <strong>Common issues to check:</strong><br>
-              - Indentation and whitespace<br>
-              - Special characters (try using simple ASCII characters)<br>
-              - Missing connections or closing brackets<br>
-              - Subgraph syntax (ensure proper nesting)<br>
-            </div>`;
-          });
-        }, 0);
+        }
       } catch (error) {
-        console.error('Error rendering Mermaid diagram:', error);
+        console.error('Error setting up Mermaid diagram:', error);
         preview.innerHTML = `<div class="error-message">
-          <strong>Error rendering diagram:</strong><br>
+          <strong>Error setting up diagram:</strong><br>
           ${error.message}<br><br>
           <strong>Common issues to check:</strong><br>
           - Indentation and whitespace<br>
@@ -278,13 +282,26 @@
             const previewContainer = document.createElement('div');
             previewContainer.className = 'chart-preview-small';
 
-            // Create the mermaid div with unique ID
-            const mermaidDiv = document.createElement('div');
-            mermaidDiv.className = 'mermaid';
-            mermaidDiv.id = 'chart-preview-' + chart.id;
-            mermaidDiv.textContent = chart.content;
-            previewContainer.appendChild(mermaidDiv);
+            // Create a container for the rendered diagram
+            const containerId = 'chart-preview-' + chart.id;
+            previewContainer.id = containerId;
             chartCard.appendChild(previewContainer);
+
+            // Render the diagram using the render API
+            try {
+              mermaid.render(containerId, chart.content)
+                .then(result => {
+                  // Success - insert the rendered SVG
+                  previewContainer.innerHTML = result.svg;
+                })
+                .catch(error => {
+                  console.error('Error rendering chart preview:', error);
+                  previewContainer.innerHTML = '<div class="error-message">Error rendering diagram</div>';
+                });
+            } catch (error) {
+              console.error('Error parsing chart preview:', error);
+              previewContainer.innerHTML = '<div class="error-message">Invalid diagram syntax</div>';
+            }
 
             // Create the actions container
             const actionsContainer = document.createElement('div');
@@ -299,16 +316,7 @@
             chartsGrid.appendChild(chartCard);
           });
 
-          // Initialize Mermaid on all chart previews using the new run API
-          // Use setTimeout to ensure the DOM is fully updated
-          setTimeout(() => {
-            mermaid.run({
-              nodes: document.querySelectorAll('.mermaid'),
-              suppressErrors: true
-            }).catch(error => {
-              console.error('Error rendering chart previews:', error);
-            });
-          }, 0);
+          // Each chart is rendered individually using the render API
 
           // Add event listeners to buttons
           document.querySelectorAll('.edit-chart').forEach(button => {
