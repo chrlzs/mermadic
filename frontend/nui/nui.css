@@ -1,0 +1,84 @@
+/* NUI Native UI Components */
+
+/* Button */
+.nui-button {
+  display: inline-block;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+  border: 1px solid transparent;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  cursor: pointer;
+}
+
+.nui-button:hover {
+  text-decoration: none;
+}
+
+.nui-button:focus {
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(74, 111, 165, 0.25);
+}
+
+.nui-button.primary {
+  color: #fff;
+  background-color: #4a6fa5;
+  border-color: #4a6fa5;
+}
+
+.nui-button.primary:hover {
+  background-color: #3d5d8a;
+  border-color: #395782;
+}
+
+.nui-button.secondary {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.nui-button.secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+.nui-button.small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-radius: 0.2rem;
+}
+
+/* Input */
+.nui-input {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.nui-input:focus {
+  color: #495057;
+  background-color: #fff;
+  border-color: #8bb2e0;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(74, 111, 165, 0.25);
+}
+
+/* Checkbox */
+input[type="checkbox"] {
+  margin-right: 0.5rem;
+}

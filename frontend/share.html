@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shared Diagram - Mermadic</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/nui/nui.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Mermadic</h1>
+      <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/login.html" id="login-link">Login</a></li>
+          <li><a href="/register.html" id="register-link">Register</a></li>
+          <li><a href="/dashboard.html" id="dashboard-link" style="display: none;">Dashboard</a></li>
+          <li><a href="#" id="logout-link" style="display: none;">Logout</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="shared-chart" class="shared-chart">
+      <div id="loading-message">Loading diagram...</div>
+      
+      <div id="chart-container" style="display: none;">
+        <h2 id="chart-title"></h2>
+        <div id="chart-content" class="mermaid-preview"></div>
+      </div>
+      
+      <div id="error-message" class="error-message" style="display: none;"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2023 Mermadic. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/js/mermaid.min.js"></script>
+  <script src="/nui/nui.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // Initialize Mermaid
+    mermaid.initialize({ startOnLoad: false });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check authentication status
+      checkAuthStatus();
+      
+      // Get share ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const shareId = urlParams.get('id');
+      
+      if (!shareId) {
+        showError('No diagram ID provided');
+        return;
+      }
+      
+      loadSharedChart(shareId);
+    });
+    
+    async function loadSharedChart(shareId) {
+      try {
+        const response = await fetch(`/api/charts/share/${shareId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to load diagram');
+        }
+        
+        const data = await response.json();
+        const chart = data.chart;
+        
+        document.getElementById('chart-title').textContent = chart.title;
+        document.getElementById('chart-content').innerHTML = chart.content;
+        
+        // Hide loading message and show chart
+        document.getElementById('loading-message').style.display = 'none';
+        document.getElementById('chart-container').style.display = 'block';
+        
+        // Render the Mermaid diagram
+        mermaid.init(undefined, document.getElementById('chart-content'));
+      } catch (error) {
+        showError(error.message || 'Failed to load diagram');
+      }
+    }
+    
+    function showError(message) {
+      document.getElementById('loading-message').style.display = 'none';
+      document.getElementById('chart-container').style.display = 'none';
+      
+      const errorMessage = document.getElementById('error-message');
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mermadic - Create and Share Mermaid Diagrams</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/nui/nui.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Mermadic</h1>
+      <nav>
+        <ul>
+          <li><a href="/" class="active">Home</a></li>
+          <li><a href="/login.html" id="login-link">Login</a></li>
+          <li><a href="/register.html" id="register-link">Register</a></li>
+          <li><a href="/dashboard.html" id="dashboard-link" style="display: none;">Dashboard</a></li>
+          <li><a href="#" id="logout-link" style="display: none;">Logout</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h2>Create, Edit, and Share Mermaid Diagrams</h2>
+      <p>A simple web application for creating and sharing diagrams using Mermaid syntax.</p>
+      <div class="cta-buttons">
+        <a href="/register.html" class="nui-button primary">Get Started</a>
+        <a href="#demo" class="nui-button secondary">See Demo</a>
+      </div>
+    </section>
+
+    <section id="demo" class="demo-section">
+      <h3>Try it out</h3>
+      <div class="editor-container">
+        <div class="editor-panel">
+          <h4>Mermaid Syntax</h4>
+          <textarea id="demo-editor" class="mermaid-editor">graph TD
+    A[Start] --> B{Is it working?}
+    B -->|Yes| C[Great!]
+    B -->|No| D[Debug]
+    D --> B</textarea>
+        </div>
+        <div class="preview-panel">
+          <h4>Preview</h4>
+          <div id="demo-preview" class="mermaid-preview"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features">
+      <h3>Features</h3>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>Live Preview</h4>
+          <p>See your diagrams render in real-time as you type.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Save & Share</h4>
+          <p>Save your diagrams and share them with unique URLs.</p>
+        </div>
+        <div class="feature-card">
+          <h4>User Dashboard</h4>
+          <p>Manage all your diagrams in one place.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Multiple Diagram Types</h4>
+          <p>Create flowcharts, sequence diagrams, class diagrams, and more.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2023 Mermadic. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/js/mermaid.min.js"></script>
+  <script src="/nui/nui.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // Initialize Mermaid
+    mermaid.initialize({ startOnLoad: false });
+    
+    // Demo editor functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const demoEditor = document.getElementById('demo-editor');
+      const demoPreview = document.getElementById('demo-preview');
+      
+      function updatePreview() {
+        demoPreview.innerHTML = '';
+        demoPreview.innerHTML = demoEditor.value;
+        mermaid.init(undefined, demoPreview);
+      }
+      
+      demoEditor.addEventListener('input', updatePreview);
+      updatePreview();
+    });
+  </script>
+</body>
+</html>
