@@ -8,6 +8,14 @@ function checkAuthStatus() {
   const registerLink = document.getElementById('register-link');
   const dashboardLink = document.getElementById('dashboard-link');
   const logoutLink = document.getElementById('logout-link');
+  const errorMessage = document.getElementById('error-message');
+
+  // Check for session expiration message
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('session') === 'expired' && errorMessage) {
+    errorMessage.textContent = 'Your session has expired. Please log in again.';
+    errorMessage.style.display = 'block';
+  }
 
   if (user) {
     // User is logged in
@@ -18,6 +26,9 @@ function checkAuthStatus() {
       logoutLink.style.display = 'inline-block';
       logoutLink.addEventListener('click', logout);
     }
+
+    // Verify session is still valid
+    verifySession();
 
     // Check for URL parameters after Google login
     checkGoogleAuthRedirect();
@@ -52,6 +63,42 @@ async function logout(e) {
     window.location.href = '/';
   } catch (error) {
     console.error('Logout error:', error);
+  }
+}
+
+// Verify if the session is still valid
+async function verifySession() {
+  // Only check once every 5 minutes to avoid excessive API calls
+  const lastCheck = localStorage.getItem('session_last_check');
+  const now = Date.now();
+  if (lastCheck && now - parseInt(lastCheck) < 5 * 60 * 1000) {
+    return; // Skip check if we checked recently
+  }
+
+  try {
+    const response = await fetch('/api/users/me', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Session expired
+        console.warn('Session verification failed - clearing user data');
+        localStorage.removeItem('user');
+        window.location.href = '/login.html?session=expired';
+        return;
+      }
+    }
+
+    // Update last check timestamp
+    localStorage.setItem('session_last_check', now.toString());
+  } catch (error) {
+    console.error('Error verifying session:', error);
+    // Don't log out on network errors
   }
 }
 

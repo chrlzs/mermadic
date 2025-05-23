@@ -51,8 +51,29 @@
       startOnLoad: false,
       securityLevel: 'loose',
       theme: 'default',
-      logLevel: 'error',
-      fontFamily: 'monospace'
+      logLevel: 'warn', // Change from 'error' to 'warn' to reduce console noise
+      fontFamily: 'monospace',
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: 'basis'
+      },
+      er: {
+        useMaxWidth: true
+      },
+      sequence: {
+        useMaxWidth: true,
+        wrap: true,
+        showSequenceNumbers: false
+      },
+      gantt: {
+        useMaxWidth: true
+      },
+      journey: {
+        useMaxWidth: true
+      },
+      // Suppress errors in the console
+      suppressErrors: true
     });
 
     document.addEventListener('DOMContentLoaded', function() {

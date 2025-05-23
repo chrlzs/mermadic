@@ -3,19 +3,35 @@
 // Load user's charts
 async function loadUserCharts() {
   try {
+    // Check if user is authenticated
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      console.warn('User not authenticated, redirecting to login');
+      window.location.href = '/login.html';
+      return [];
+    }
+
     const response = await fetch('/api/charts', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include' // Include cookies for session authentication
     });
-    
+
     if (!response.ok) {
+      if (response.status === 401) {
+        // Handle unauthorized error
+        console.warn('Session expired, redirecting to login');
+        localStorage.removeItem('user'); // Clear invalid user data
+        window.location.href = '/login.html?session=expired';
+        return [];
+      }
       throw new Error('Failed to load charts');
     }
-    
+
     const data = await response.json();
-    return data.charts;
+    return data.charts || [];
   } catch (error) {
     console.error('Error loading charts:', error);
     return [];
@@ -30,13 +46,21 @@ async function createChart(title, content, isPublic) {
       headers: {
         'Content-Type': 'application/json'
       },
+      credentials: 'include', // Include cookies for session authentication
       body: JSON.stringify({ title, content, isPublic })
     });
-    
+
     if (!response.ok) {
+      if (response.status === 401) {
+        // Handle unauthorized error
+        console.warn('Session expired, redirecting to login');
+        localStorage.removeItem('user'); // Clear invalid user data
+        window.location.href = '/login.html?session=expired';
+        throw new Error('Session expired');
+      }
       throw new Error('Failed to create chart');
     }
-    
+
     const data = await response.json();
     return data.chart;
   } catch (error) {
@@ -53,13 +77,21 @@ async function updateChart(chartId, title, content, isPublic) {
       headers: {
         'Content-Type': 'application/json'
       },
+      credentials: 'include', // Include cookies for session authentication
       body: JSON.stringify({ title, content, isPublic })
     });
-    
+
     if (!response.ok) {
+      if (response.status === 401) {
+        // Handle unauthorized error
+        console.warn('Session expired, redirecting to login');
+        localStorage.removeItem('user'); // Clear invalid user data
+        window.location.href = '/login.html?session=expired';
+        throw new Error('Session expired');
+      }
       throw new Error('Failed to update chart');
     }
-    
+
     const data = await response.json();
     return data;
   } catch (error) {
@@ -75,13 +107,21 @@ async function deleteChart(chartId) {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include' // Include cookies for session authentication
     });
-    
+
     if (!response.ok) {
+      if (response.status === 401) {
+        // Handle unauthorized error
+        console.warn('Session expired, redirecting to login');
+        localStorage.removeItem('user'); // Clear invalid user data
+        window.location.href = '/login.html?session=expired';
+        throw new Error('Session expired');
+      }
       throw new Error('Failed to delete chart');
     }
-    
+
     const data = await response.json();
     return data;
   } catch (error) {
@@ -97,13 +137,21 @@ async function getChartById(chartId) {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include' // Include cookies for session authentication
     });
-    
+
     if (!response.ok) {
+      if (response.status === 401) {
+        // Handle unauthorized error
+        console.warn('Session expired, redirecting to login');
+        localStorage.removeItem('user'); // Clear invalid user data
+        window.location.href = '/login.html?session=expired';
+        throw new Error('Session expired');
+      }
       throw new Error('Failed to load chart');
     }
-    
+
     const data = await response.json();
     return data.chart;
   } catch (error) {
