@@ -1,7 +1,7 @@
 // Chart related functions
 
 // Load user's charts
-async function loadUserCharts() {
+async function getAllCharts() {
   try {
     // Check if user is authenticated
     const user = JSON.parse(localStorage.getItem('user'));
@@ -132,6 +132,10 @@ async function deleteChart(chartId) {
 
 // Get a chart by ID
 async function getChartById(chartId) {
+  // If no chartId is provided, throw an error
+  if (!chartId) {
+    throw new Error('Chart ID is required');
+  }
   try {
     const response = await fetch(`/api/charts/${chartId}`, {
       method: 'GET',
@@ -159,3 +163,10 @@ async function getChartById(chartId) {
     throw error;
   }
 }
+
+// Expose functions to global scope
+window.getAllCharts = getAllCharts;
+window.createChart = createChart;
+window.updateChart = updateChart;
+window.deleteChart = deleteChart;
+window.getChartById = getChartById;
