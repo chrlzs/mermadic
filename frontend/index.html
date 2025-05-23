@@ -133,6 +133,9 @@
           mermaidDiv.id = id;
           mermaidDiv.className = 'mermaid';
 
+          // Set the diagram code BEFORE appending to DOM
+          mermaidDiv.textContent = demoEditor.value;
+
           // Append the div element to the preview div
           demoPreview.appendChild(mermaidDiv);
 
@@ -150,27 +153,27 @@
             </div>`;
           };
 
-          // Render the diagram using the new run API
-          mermaid.run({
-            nodes: [document.getElementById(id)],
-            suppressErrors: true
-          }).then(() => {
-            // Success - diagram rendered
-          }).catch(error => {
-            console.error('Error rendering Mermaid diagram:', error);
-            demoPreview.innerHTML = `<div class="error-message">
-              <strong>Error rendering diagram:</strong><br>
-              ${error.message || 'Unknown error'}<br><br>
-              <strong>Common issues to check:</strong><br>
-              - Indentation and whitespace<br>
-              - Special characters (try using simple ASCII characters)<br>
-              - Missing connections or closing brackets<br>
-              - Subgraph syntax (ensure proper nesting)<br>
-            </div>`;
-          });
-
-          // Set the diagram code after creating the element
-          mermaidDiv.textContent = demoEditor.value;
+          // Use setTimeout to ensure the DOM is fully updated before rendering
+          setTimeout(() => {
+            // Render the diagram using the new run API
+            mermaid.run({
+              nodes: [document.getElementById(id)],
+              suppressErrors: true
+            }).then(() => {
+              // Success - diagram rendered
+            }).catch(error => {
+              console.error('Error rendering Mermaid diagram:', error);
+              demoPreview.innerHTML = `<div class="error-message">
+                <strong>Error rendering diagram:</strong><br>
+                ${error.message || 'Unknown error'}<br><br>
+                <strong>Common issues to check:</strong><br>
+                - Indentation and whitespace<br>
+                - Special characters (try using simple ASCII characters)<br>
+                - Missing connections or closing brackets<br>
+                - Subgraph syntax (ensure proper nesting)<br>
+              </div>`;
+            });
+          }, 0);
         } catch (error) {
           console.error('Error setting up Mermaid diagram:', error);
           demoPreview.innerHTML = `<div class="error-message">
