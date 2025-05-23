@@ -92,7 +92,7 @@
       startOnLoad: false,
       securityLevel: 'loose',
       theme: 'default',
-      logLevel: 'warn', // Change from 'error' to 'warn' to reduce console noise
+      logLevel: 'error', // Change to 'error' to hide warnings
       fontFamily: 'monospace',
       flowchart: {
         useMaxWidth: true,
@@ -202,8 +202,28 @@
           </div>`;
         };
 
-        // Render the diagram
-        mermaid.init(undefined, mermaidDiv);
+        // Generate a unique ID for the diagram
+        const id = 'mermaid-diagram-' + Date.now();
+        mermaidDiv.id = id;
+
+        // Render the diagram using the new run API
+        mermaid.run({
+          nodes: [mermaidDiv],
+          suppressErrors: true
+        }).then(() => {
+          // Success - diagram rendered
+        }).catch(error => {
+          console.error('Error rendering Mermaid diagram:', error);
+          preview.innerHTML = `<div class="error-message">
+            <strong>Error rendering diagram:</strong><br>
+            ${error.message || 'Unknown error'}<br><br>
+            <strong>Common issues to check:</strong><br>
+            - Indentation and whitespace<br>
+            - Special characters (try using simple ASCII characters)<br>
+            - Missing connections or closing brackets<br>
+            - Subgraph syntax (ensure proper nesting)<br>
+          </div>`;
+        });
       } catch (error) {
         console.error('Error rendering Mermaid diagram:', error);
         preview.innerHTML = `<div class="error-message">
@@ -253,9 +273,10 @@
             const previewContainer = document.createElement('div');
             previewContainer.className = 'chart-preview-small';
 
-            // Create the mermaid div
+            // Create the mermaid div with unique ID
             const mermaidDiv = document.createElement('div');
             mermaidDiv.className = 'mermaid';
+            mermaidDiv.id = 'chart-preview-' + chart.id;
             mermaidDiv.textContent = chart.content;
             previewContainer.appendChild(mermaidDiv);
             chartCard.appendChild(previewContainer);
@@ -273,8 +294,13 @@
             chartsGrid.appendChild(chartCard);
           });
 
-          // Initialize Mermaid on all chart previews
-          mermaid.init(undefined, document.querySelectorAll('.chart-preview-small'));
+          // Initialize Mermaid on all chart previews using the new run API
+          mermaid.run({
+            nodes: document.querySelectorAll('.mermaid'),
+            suppressErrors: true
+          }).catch(error => {
+            console.error('Error rendering chart previews:', error);
+          });
 
           // Add event listeners to buttons
           document.querySelectorAll('.edit-chart').forEach(button => {
