@@ -106,11 +106,35 @@
           document.getElementById('loading-message').style.display = 'none';
           document.getElementById('chart-container').style.display = 'block';
 
+          // Add error handling callback
+          mermaid.parseError = function(err, hash) {
+            console.error('Mermaid parse error:', err);
+            chartContent.innerHTML = `<div class="error-message">
+              <strong>Mermaid Syntax Error:</strong><br>
+              ${err}<br><br>
+              <strong>Common issues to check:</strong><br>
+              - Indentation and whitespace<br>
+              - Special characters (try using simple ASCII characters)<br>
+              - Missing connections or closing brackets<br>
+              - Subgraph syntax (ensure proper nesting)<br>
+            </div>`;
+            document.getElementById('loading-message').style.display = 'none';
+            document.getElementById('chart-container').style.display = 'block';
+          };
+
           // Render the Mermaid diagram
           mermaid.init(undefined, mermaidDiv);
         } catch (error) {
           console.error('Error rendering Mermaid diagram:', error);
-          chartContent.innerHTML = `<div class="error-message">Error rendering diagram: ${error.message}</div>`;
+          chartContent.innerHTML = `<div class="error-message">
+            <strong>Error rendering diagram:</strong><br>
+            ${error.message}<br><br>
+            <strong>Common issues to check:</strong><br>
+            - Indentation and whitespace<br>
+            - Special characters (try using simple ASCII characters)<br>
+            - Missing connections or closing brackets<br>
+            - Subgraph syntax (ensure proper nesting)<br>
+          </div>`;
           document.getElementById('loading-message').style.display = 'none';
           document.getElementById('chart-container').style.display = 'block';
         }
