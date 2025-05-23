@@ -283,6 +283,18 @@ footer {
   border-radius: var(--border-radius);
   padding: 0.75rem;
   background-color: white;
+  overflow: auto;
+}
+
+.mermaid-preview .error-message {
+  color: var(--danger-color);
+  padding: 0.5rem;
+  border: 1px solid var(--danger-color);
+  border-radius: var(--border-radius);
+  background-color: rgba(220, 53, 69, 0.1);
+  font-family: monospace;
+  white-space: pre-wrap;
+  margin-top: 0.5rem;
 }
 
 /* Demo section */

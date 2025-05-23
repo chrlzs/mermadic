@@ -85,21 +85,49 @@
   <script src="/js/main.js"></script>
   <script src="/js/auth.js"></script>
   <script>
-    // Initialize Mermaid
-    mermaid.initialize({ startOnLoad: false });
-    
+    // Initialize Mermaid with better error handling
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'default',
+      logLevel: 'error',
+      fontFamily: 'monospace'
+    });
+
     // Demo editor functionality
     document.addEventListener('DOMContentLoaded', function() {
       const demoEditor = document.getElementById('demo-editor');
       const demoPreview = document.getElementById('demo-preview');
-      
+
       function updatePreview() {
-        demoPreview.innerHTML = '';
-        demoPreview.innerHTML = demoEditor.value;
-        mermaid.init(undefined, demoPreview);
+        try {
+          // Clear the preview div
+          demoPreview.innerHTML = '';
+
+          // Create a pre element with class mermaid
+          const pre = document.createElement('div');
+          pre.className = 'mermaid';
+          pre.textContent = demoEditor.value;
+
+          // Append the pre element to the preview div
+          demoPreview.appendChild(pre);
+
+          // Render the diagram
+          mermaid.init(undefined, pre);
+        } catch (error) {
+          console.error('Error rendering Mermaid diagram:', error);
+          demoPreview.innerHTML = `<div class="error-message">Error rendering diagram: ${error.message}</div>`;
+        }
       }
-      
-      demoEditor.addEventListener('input', updatePreview);
+
+      // Update preview on input with debounce
+      let debounceTimer;
+      demoEditor.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(updatePreview, 300); // 300ms debounce
+      });
+
+      // Initial preview
       updatePreview();
     });
   </script>
