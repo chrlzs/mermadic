@@ -88,6 +88,13 @@
         const chartContent = document.getElementById('chart-content');
         chartContent.innerHTML = '';
 
+        // Remove any existing zoom controls
+        const chartContentParent = chartContent.parentNode;
+        if (chartContentParent) {
+          const existingControls = chartContentParent.querySelectorAll('.zoom-controls');
+          existingControls.forEach(control => control.remove());
+        }
+
         try {
           // Use server-side rendering
           const renderResponse = await fetch('/api/render/html', {

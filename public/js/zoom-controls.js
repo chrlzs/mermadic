@@ -6,6 +6,16 @@ const MAX_ZOOM = 3.0;
 const ZOOM_STEP = 0.25;
 const DEFAULT_ZOOM = 1.0;
 
+// Utility function to remove existing zoom controls
+function removeExistingZoomControls(container) {
+  // Remove any existing zoom controls that are siblings of the container
+  const parent = container.parentNode;
+  if (parent) {
+    const existingControls = parent.querySelectorAll('.zoom-controls');
+    existingControls.forEach(control => control.remove());
+  }
+}
+
 // Initialize zoom controls for a container
 function initZoomControls(containerId, contentId) {
   console.log('Initializing zoom controls for:', containerId, contentId);
@@ -19,6 +29,9 @@ function initZoomControls(containerId, contentId) {
   }
 
   console.log('Found container and content elements:', container, content);
+
+  // Remove any existing zoom controls first
+  removeExistingZoomControls(container);
 
   // Add zoom controls
   const zoomControls = document.createElement('div');
@@ -117,6 +130,9 @@ function initIframeZoomControls(containerId, iframeId) {
   }
 
   console.log('Found container and iframe elements:', container, iframe);
+
+  // Remove any existing zoom controls first
+  removeExistingZoomControls(container);
 
   // Add zoom controls
   const zoomControls = document.createElement('div');
