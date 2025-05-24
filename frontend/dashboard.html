@@ -217,6 +217,13 @@
     function hideChartEditor() {
       document.getElementById('chart-editor').style.display = 'none';
       document.getElementById('charts-list').style.display = 'block';
+
+      // Clean up any zoom controls when hiding the editor
+      const preview = document.getElementById('chart-preview');
+      if (preview && preview.parentNode) {
+        const existingControls = preview.parentNode.querySelectorAll('.zoom-controls');
+        existingControls.forEach(control => control.remove());
+      }
     }
 
     function updateChartPreview() {
@@ -226,6 +233,13 @@
       try {
         // Clear the preview div
         preview.innerHTML = '';
+
+        // Remove any existing zoom controls for the preview
+        const previewParent = preview.parentNode;
+        if (previewParent) {
+          const existingControls = previewParent.querySelectorAll('.zoom-controls');
+          existingControls.forEach(control => control.remove());
+        }
 
         // Generate a unique ID for the diagram
         const id = 'mermaid-diagram-' + Date.now();
@@ -574,6 +588,13 @@
         const container = document.getElementById('view-chart-container');
         container.innerHTML = '';
 
+        // Remove any existing zoom controls for the view modal
+        const containerParent = container.parentNode;
+        if (containerParent) {
+          const existingControls = containerParent.querySelectorAll('.zoom-controls');
+          existingControls.forEach(control => control.remove());
+        }
+
         // Create a div with the mermaid class
         const mermaidDiv = document.createElement('div');
         mermaidDiv.className = 'mermaid';
@@ -663,6 +684,13 @@
     // Hide the view modal
     function hideViewModal() {
       document.getElementById('view-chart-modal').style.display = 'none';
+
+      // Clean up any zoom controls when hiding the modal
+      const container = document.getElementById('view-chart-container');
+      if (container && container.parentNode) {
+        const existingControls = container.parentNode.querySelectorAll('.zoom-controls');
+        existingControls.forEach(control => control.remove());
+      }
     }
 
     // Function to fetch current user from session
