@@ -178,6 +178,11 @@ exports.renderDiagramHtml = async (req, res) => {
 <body>
   <div class="container">
     ${title ? `<h1>${title}</h1>` : ''}
+    <div class="zoom-controls">
+      <button class="zoom-out" title="Zoom Out">-</button>
+      <button class="zoom-reset" title="Reset Zoom">↺</button>
+      <button class="zoom-in" title="Zoom In">+</button>
+    </div>
     <div id="mermaid-container" class="mermaid-container">
       <div id="mermaid-content" class="mermaid">
 ${content}
@@ -186,9 +191,46 @@ ${content}
     <script>
       // Initialize zoom controls when the page loads
       document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-          initZoomControls('mermaid-container', 'mermaid-content');
-        }, 500);
+        // Set current zoom level
+        let currentZoom = 1.0;
+
+        // Get zoom control buttons and container
+        const zoomInBtn = document.querySelector('.zoom-in');
+        const zoomOutBtn = document.querySelector('.zoom-out');
+        const zoomResetBtn = document.querySelector('.zoom-reset');
+        const mermaidContent = document.getElementById('mermaid-content');
+
+        // Add event listeners
+        zoomInBtn.addEventListener('click', () => {
+          if (currentZoom < 3.0) {
+            currentZoom += 0.25;
+            updateZoom();
+          }
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+          if (currentZoom > 0.5) {
+            currentZoom -= 0.25;
+            updateZoom();
+          }
+        });
+
+        zoomResetBtn.addEventListener('click', () => {
+          currentZoom = 1.0;
+          updateZoom();
+        });
+
+        // Update zoom level
+        function updateZoom() {
+          mermaidContent.style.transform = `scale(${currentZoom})`;
+          mermaidContent.style.transformOrigin = 'center center';
+
+          // Update button states
+          zoomInBtn.disabled = currentZoom >= 3.0;
+          zoomOutBtn.disabled = currentZoom <= 0.5;
+
+          console.log('Current zoom level:', currentZoom);
+        }
       });
     </script>
   </div>
@@ -283,6 +325,11 @@ exports.renderDiagramPage = async (req, res) => {
 <body>
   <div class="container">
     <h1>${chart.title}</h1>
+    <div class="zoom-controls">
+      <button class="zoom-out" title="Zoom Out">-</button>
+      <button class="zoom-reset" title="Reset Zoom">↺</button>
+      <button class="zoom-in" title="Zoom In">+</button>
+    </div>
     <div id="mermaid-container" class="mermaid-container">
       <div id="mermaid-content" class="mermaid">
 ${chart.content}
@@ -291,9 +338,46 @@ ${chart.content}
     <script>
       // Initialize zoom controls when the page loads
       document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-          initZoomControls('mermaid-container', 'mermaid-content');
-        }, 500);
+        // Set current zoom level
+        let currentZoom = 1.0;
+
+        // Get zoom control buttons and container
+        const zoomInBtn = document.querySelector('.zoom-in');
+        const zoomOutBtn = document.querySelector('.zoom-out');
+        const zoomResetBtn = document.querySelector('.zoom-reset');
+        const mermaidContent = document.getElementById('mermaid-content');
+
+        // Add event listeners
+        zoomInBtn.addEventListener('click', () => {
+          if (currentZoom < 3.0) {
+            currentZoom += 0.25;
+            updateZoom();
+          }
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+          if (currentZoom > 0.5) {
+            currentZoom -= 0.25;
+            updateZoom();
+          }
+        });
+
+        zoomResetBtn.addEventListener('click', () => {
+          currentZoom = 1.0;
+          updateZoom();
+        });
+
+        // Update zoom level
+        function updateZoom() {
+          mermaidContent.style.transform = `scale(${currentZoom})`;
+          mermaidContent.style.transformOrigin = 'center center';
+
+          // Update button states
+          zoomInBtn.disabled = currentZoom >= 3.0;
+          zoomOutBtn.disabled = currentZoom <= 0.5;
+
+          console.log('Current zoom level:', currentZoom);
+        }
       });
     </script>
     <div class="footer">
