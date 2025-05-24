@@ -46,25 +46,26 @@
   </footer>
 
   <script src="/js/auth.js"></script>
+  <script src="/js/zoom-controls.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Check auth status
       checkAuthStatus();
-      
+
       // Get share ID from URL
       const urlParams = new URLSearchParams(window.location.search);
       const shareId = urlParams.get('id');
-      
+
       if (!shareId) {
         document.getElementById('loading-message').style.display = 'none';
         document.getElementById('error-message').textContent = 'No diagram ID provided';
         document.getElementById('error-message').style.display = 'block';
         return;
       }
-      
+
       loadSharedChart(shareId);
     });
-    
+
     async function loadSharedChart(shareId) {
       try {
         const response = await fetch(`/api/charts/share/${shareId}`, {
@@ -73,20 +74,20 @@
             'Content-Type': 'application/json'
           }
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to load diagram');
         }
-        
+
         const data = await response.json();
         const chart = data.chart;
-        
+
         document.getElementById('chart-title').textContent = chart.title;
-        
+
         // Create a mermaid div for the content
         const chartContent = document.getElementById('chart-content');
         chartContent.innerHTML = '';
-        
+
         try {
           // Use server-side rendering
           const renderResponse = await fetch('/api/render/html', {
@@ -99,32 +100,38 @@
               title: chart.title
             })
           });
-          
+
           if (!renderResponse.ok) {
             throw new Error('Failed to render diagram');
           }
-          
+
           const renderData = await renderResponse.json();
-          
+
           // Create an iframe to display the rendered HTML
           const iframe = document.createElement('iframe');
+          iframe.id = 'chart-iframe';
           iframe.style.width = '100%';
           iframe.style.height = '500px';
           iframe.style.border = 'none';
           iframe.style.overflow = 'hidden';
-          
+
           // Append the iframe to the content div
           chartContent.appendChild(iframe);
-          
+
           // Set the iframe content
           const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
           iframeDoc.open();
           iframeDoc.write(renderData.html);
           iframeDoc.close();
-          
+
+          // Initialize zoom controls for the iframe
+          setTimeout(() => {
+            initIframeZoomControls('chart-content', 'chart-iframe');
+          }, 500); // Wait for iframe to fully load
+
           // Set the standalone view link
           document.getElementById('view-standalone').href = `/api/render/page/${chart.id}`;
-          
+
           // Hide loading message and show chart
           document.getElementById('loading-message').style.display = 'none';
           document.getElementById('chart-container').style.display = 'block';

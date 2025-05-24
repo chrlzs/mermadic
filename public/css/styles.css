@@ -439,6 +439,52 @@ footer {
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
+/* Zoom controls */
+.zoom-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  justify-content: flex-end;
+}
+
+.zoom-controls button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-controls button:hover {
+  background-color: var(--primary-dark-color);
+}
+
+.zoom-controls button:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
+}
+
+/* Zoomable container */
+.zoomable-container {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  transform-origin: center center;
+}
+
+.zoomable-content {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
 /* Fix for Mermaid SVG positioning */
 .mermaid-container {
   position: relative;
