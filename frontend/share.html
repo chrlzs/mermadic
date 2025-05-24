@@ -124,10 +124,72 @@
           iframeDoc.write(renderData.html);
           iframeDoc.close();
 
-          // Initialize zoom controls for the iframe
-          setTimeout(() => {
-            initIframeZoomControls('chart-content', 'chart-iframe');
-          }, 500); // Wait for iframe to fully load
+          // Add zoom controls directly
+          const zoomControls = document.createElement('div');
+          zoomControls.className = 'zoom-controls';
+          zoomControls.innerHTML = `
+            <button class="zoom-out" title="Zoom Out">-</button>
+            <button class="zoom-reset" title="Reset Zoom">↺</button>
+            <button class="zoom-in" title="Zoom In">+</button>
+          `;
+
+          // Insert zoom controls before the iframe container
+          chartContent.parentNode.insertBefore(zoomControls, chartContent);
+
+          // Set current zoom level
+          let currentZoom = 1.0;
+
+          // Get zoom control buttons
+          const zoomInBtn = zoomControls.querySelector('.zoom-in');
+          const zoomOutBtn = zoomControls.querySelector('.zoom-out');
+          const zoomResetBtn = zoomControls.querySelector('.zoom-reset');
+
+          // Add event listeners
+          zoomInBtn.addEventListener('click', () => {
+            if (currentZoom < 3.0) {
+              currentZoom += 0.25;
+              updateZoom();
+            }
+          });
+
+          zoomOutBtn.addEventListener('click', () => {
+            if (currentZoom > 0.5) {
+              currentZoom -= 0.25;
+              updateZoom();
+            }
+          });
+
+          zoomResetBtn.addEventListener('click', () => {
+            currentZoom = 1.0;
+            updateZoom();
+          });
+
+          // Update zoom level
+          function updateZoom() {
+            try {
+              // Try to access the iframe content
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+              const mermaidDiv = iframeDoc.querySelector('.mermaid');
+
+              if (mermaidDiv) {
+                mermaidDiv.style.transform = `scale(${currentZoom})`;
+                mermaidDiv.style.transformOrigin = 'center top';
+                mermaidDiv.style.display = 'block';
+                mermaidDiv.style.margin = '0 auto';
+              }
+
+              // Update button states
+              zoomInBtn.disabled = currentZoom >= 3.0;
+              zoomOutBtn.disabled = currentZoom <= 0.5;
+
+              console.log('Current iframe zoom level:', currentZoom);
+            } catch (error) {
+              console.error('Error updating iframe zoom:', error);
+            }
+          }
+
+          // Initialize zoom when iframe loads
+          iframe.addEventListener('load', updateZoom);
 
           // Set the standalone view link
           document.getElementById('view-standalone').href = `/api/render/page/${chart.id}`;
