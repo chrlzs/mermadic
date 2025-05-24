@@ -222,7 +222,7 @@ ${content}
 
         // Update zoom level
         function updateZoom() {
-          mermaidContent.style.transform = `scale(${currentZoom})`;
+          mermaidContent.style.transform = 'scale(' + currentZoom + ')';
           mermaidContent.style.transformOrigin = 'center center';
 
           // Update button states
@@ -369,7 +369,7 @@ ${chart.content}
 
         // Update zoom level
         function updateZoom() {
-          mermaidContent.style.transform = `scale(${currentZoom})`;
+          mermaidContent.style.transform = 'scale(' + currentZoom + ')';
           mermaidContent.style.transformOrigin = 'center center';
 
           // Update button states
